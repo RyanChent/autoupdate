@@ -1,0 +1,31 @@
+{
+  "name": "autoupdate",
+  "version": "1.0.0",
+  "description": "a plugin that you can use it to auto restart program",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./bin/autoupdate.js watch ./bin -m client -c npm run dev"
+  },
+  "keywords": [
+    "autoupdate",
+    "node",
+    "hot-reload"
+  ],
+  "bin": {
+    "autoupdate": "bin/autoupdate.js"
+  },
+  "author": "JarryChen",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "chokidar": "^3.5.2",
+    "commander": "^8.1.0",
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "mime": "^2.5.2",
+    "ora": "^5.4.1",
+    "pm2": "^5.1.0",
+    "ws": "^8.1.0"
+  }
+}
