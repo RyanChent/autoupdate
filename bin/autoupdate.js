@@ -56,7 +56,8 @@ program
                 childProcess = fork(`./bin/env/${env}`)
                 childProcess.send({
                     port: p,
-                    message: 'init'
+                    message: 'init',
+                    url: dirPath
                 })
                 await watch(watcher, childProcess, dirPath, env, cmd)
                 spinner.succeed('Start successful')
