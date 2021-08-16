@@ -1,5 +1,5 @@
 {
-  "name": "autoupdate",
+  "name": "autoupdate-simple",
   "version": "1.0.0",
   "description": "a plugin that you can use it to auto restart program",
   "main": "index.js",
