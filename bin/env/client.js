@@ -12,7 +12,7 @@ const {
 const {
     join
 } = require('path')
-const webSocket = require('ws').Server
+const io = require('socket.io')
 const mime = require('mime/lite')
 
 let server, ws, index
@@ -21,34 +21,27 @@ const createServer = (port, url) => {
     const server = http.createServer((req, res) => {
         res.writeHead(200)
         if (req.url === '/') {
-            res.end(index.replace('</body>', `<script type="text/javascript">
-                window.onload = () => {
-                    const ws = new WebSocket('ws://localhost:${port}')
-                    ws.onopen = () => {
-                        console.log(ws)
-                        ws.onmessage = (message) => {
-                            console.log(message)
-                            location.reload()
-                        }
-                    }
-                }
-            </script>
-            </body>`))
+            res.end(index.replace('</body>', `<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+            <script type="text/javascript">
+window.onload = () => {
+    const ws = io('http://localhost:${port}')
+    ws.on('news', () => {
+        location.reload()
+    })
+}
+</script>
+</body>`))
         } else {
             res.end(join(url, req.url))
         }
     })
-    if (!ws) {
-        ws = new webSocket({ server })
-        ws.on('connection', () => {
-            console.log(chalk.green('server socket is on'))
-            ws.on('message', console.log)
-        })
-    }
     server.listen(port, () => {
         console.log(chalk.green(`The web page is running on http://localhost:${port}`))
-        execSync(`start http://localhost:${port}`)
     })
+    ws = io(server, {
+        allowEIO3: true,
+    })
+    execSync(`start http://localhost:${port}`)
     return server
 }
 
@@ -64,9 +57,7 @@ process.on('message', ({
         if (mime.getType(url) === 'text/html') {
             index = readFileSync(url, 'utf-8')
         }
-        if (ws && ws.send) {
-            ws.send('reload')
-        }
+        ws.emit && ws.emit('news')
     }
 })
 
