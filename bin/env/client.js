@@ -14,6 +14,7 @@ const {
 } = require('path')
 const io = require('socket.io')
 const mime = require('mime/lite')
+const { findFile } = require('../utils')
 
 let server, ws, index
 
@@ -36,7 +37,7 @@ window.onload = () => {
         }
     })
     server.listen(port, () => {
-        console.log(chalk.green(`The web page is running on http://localhost:${port}`))
+        console.log(chalk.greenBright(`The web page is running on http://localhost:${port}`))
     })
     ws = io(server, {
         allowEIO3: true,
@@ -51,11 +52,12 @@ process.on('message', ({
     url
 }) => {
     if (!server && message === 'init') {
-        server = createServer(port, url)
+        server = createServer(port, findFile(undefined, 'text/html', 'index.html'))
     } else if (message === 'update') {
-        console.log(chalk.yellowBright(`file ${url} changed, and the page will be reload`))
-        if (mime.getType(url) === 'text/html') {
-            index = readFileSync(url, 'utf-8')
+        console.log(chalk.yellowBright(`file ${url} changed, and the page will reload`))
+        const content = readFileSync(url, 'utf-8')
+        if (mime.getType(url) === 'text/html' && index != content) {
+            index = content
         }
         ws.emit && ws.emit('news')
     }
@@ -63,6 +65,8 @@ process.on('message', ({
 
 process.on('beforeExit', (status) => {
     server && server.close()
+    ws && ws.close()
+    ws = null
     server = null
     process.exit(1)
 })

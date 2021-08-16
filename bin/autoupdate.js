@@ -8,21 +8,18 @@ const {
 const ora = require('ora')
 const chalk = require('chalk')
 const {
-    fork,
-    execSync
+    fork
 } = require('child_process')
 const {
     resolve
 } = require('path')
 const {
     getPort,
-    getMode,
-    getCommand
+    getMode
 } = require('./utils')
+const { normalizeFile } = require('./utils')
 
 let childProcess = null
-
-const current = process.cwd()
 
 const exit = () => {
     childProcess && childProcess.kill('SIGINT')
@@ -37,37 +34,51 @@ program
     .version('1.0.0', '-v, --version')
     .command('watch <dir>')
     .option('-m, --mode <mode>', 'only server or client can be accepted, default is server')
-    .option('-c, --command <command...>', 'once file changed may exec, commands should be aggregated into one sentence')
     .option('-p, --port <port>', 'hot reload program port')
+    .option('-f, --file <file>', 'server entry file to start')
     .action(async (dir, {
         mode = 'server',
-        command = [],
-        port = 12345
+        port = 12345,
+        file
     }) => {
         const spinner = ora('Starting...')
         const validPath = /^(?:[^\/]+\/?)+[^\/]$/
         try {
             if (validPath.test(dir)) {
+                /** init var */
                 const env = getMode(mode),
                     p = getPort(port),
-                    cmd = getCommand(command),
-                    dirPath = resolve(current, dir)
+                    dirPath = resolve(process.cwd(), dir)
+
+                /** init watcher */
                 const watcher = await init(dirPath)
+
+                /** test server entry */
+                if (file && !validPath.test(file)) {
+                    throw new Error('the server entry path is invalid, please check it')
+                }
+
+                /** fork child process */
                 childProcess = fork(`./bin/env/${env}`)
                 childProcess.send({
                     port: p,
                     message: 'init',
-                    url: dirPath
+                    url: env === 'client' ? dirPath : file
                 })
-                await watch(watcher, childProcess, dirPath, env, cmd)
+
+                /** add watch event */
+                await watch(watcher, childProcess, dirPath, env, normalizeFile(file, '.js'))
+
+                /** start success */
                 spinner.succeed('Start successful')
-                console.log(chalk.green(`the server is started on port ${p}`))
+                console.log(chalk.greenBright(`the server is started on port ${p}`))
+
             } else {
                 throw new Error('the path is invalid, please check it')
             }
         } catch (e) {
             spinner.fail('Start Failed')
-            console.log(chalk.red(e.message || e))
+            console.log(chalk.redBright(e.message || e))
             process.exit(-1)
         }
     })

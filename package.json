@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./bin/autoupdate.js watch ./bin -m client -c npm run dev"
+    "clint": "node ./bin/autoupdate.js watch ./bin -m client",
+    "server": "node ./bin/autoupdate.js watch ./bin -m server -f utils.js"
   },
   "keywords": [
     "autoupdate",

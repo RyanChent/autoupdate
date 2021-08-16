@@ -1,30 +1,11 @@
 const chokidar = require('chokidar')
 const {
-    statSync,
-    readdirSync
+    statSync
 } = require('fs')
 const {
     resolve
 } = require('path')
-const mime = require('mime/lite')
-
-const htmls = []
-
-const findHtml = (path, type = 'text/html', name = 'index.html') => {
-    const fileNames = readdirSync(path)
-    for (const name of fileNames) {
-        const file = resolve(path, name)
-        if (mime.getType(file) === type) {
-            htmls.push(file)
-        }
-        const isExist = statSync(file)
-        if (isExist.isDirectory()) {
-            findHtml(file, type)
-        }
-    }
-
-    return htmls.find(html => html && html.includes(name)) || htmls[0]
-}
+const { findFile } = require('./utils')
 
 exports.init = (filePath) => {
     return new Promise((resolve, reject) => {
@@ -47,24 +28,20 @@ exports.init = (filePath) => {
     })
 }
 
-exports.watch = async (watcher, childProcess, dir, mode, cmd) => {
+exports.watch = async (watcher, childProcess, dir, mode, serverEntry) => {
     const handler = (filename) => {
         const filepath = resolve(dir, filename)
         if (childProcess) {
-            if (mode === 'client') {
-                childProcess.send({
-                    message: 'update',
-                    url: filepath
-                })
-            } else if (mode === 'server') {
-                console.log(mime.getType(filepath))
-            }
+            childProcess.send({
+                message: 'update',
+                url: filepath
+            })
         }
     }
     if (watcher) {
         watcher.on('change', handler).on('unlink', handler).on('unlinkDir', handler)
         if (mode === 'client') {
-            const html = findHtml(dir)
+            const html = findFile(undefined, 'text/html', 'index.html')
             html && childProcess.send({
                 message: 'update',
                 url: html
