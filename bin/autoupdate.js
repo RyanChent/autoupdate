@@ -68,7 +68,7 @@ program
                 })
 
                 /** add watch event */
-                await watch(watcher, childProcess, dirPath, env, normalizeFile(file, '.js'))
+                await watch(watcher, childProcess, dirPath, env)
 
                 /** start success */
                 spinner.succeed('Start successful')

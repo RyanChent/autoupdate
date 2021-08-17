@@ -29,20 +29,3 @@ module.exports = {
         execSync('npx pm2 del all')
     }
 }
-// process.on('message', ({
-//     message,
-//     url
-// }) => {
-//     if (message === 'init') {
-//         index = findFile(undefined, 'application/javascript', url)
-//         startScript()
-//     } else if (message === 'update') {
-//         console.log(chalk.yellowBright(`file ${url} changed, and the server will restart`))
-//         execSync(`npx pm2 restart ${index}`)
-//     }
-// })
-
-// process.on('beforeExit', (status) => {
-//     execSync(`npx pm2 del all`)
-//     process.exit(1)
-// })

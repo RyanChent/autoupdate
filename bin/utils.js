@@ -29,6 +29,7 @@ exports.getCommand = (command) => {
 }
 
 exports.normalizeFile = (path, suffix) => {
+    console.log(path)
     const temp = process.platform === 'win32' ? path.split('\\\\') : path.split('/')
     if (temp[temp.length - 1]) {
         const res = temp[temp.length - 1]

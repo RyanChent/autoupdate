@@ -16,16 +16,28 @@ const io = require('socket.io')
 const mime = require('mime/lite')
 const { findFile } = require('../utils')
 
-let server, ws, index
+let server, ws, index, portDefault = 12345
+
+const serverError = () => {
+    server && server.close()
+    portDefault += 1
+    server.listen(portDefault, '0.0.0.0', () => {
+        console.log(chalk.greenBright(`The web page is running on http://localhost:${portDefault}`))
+    })
+    ws = io(server, {
+        allowEIO3: true,
+    })
+}
 
 const createServer = (port, url) => {
+    portDefault = port
     const server = http.createServer((req, res) => {
         res.writeHead(200)
         if (req.url === '/') {
             res.end(index.replace('</body>', `<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
             <script type="text/javascript">
 window.onload = () => {
-    const ws = io('http://localhost:${port}')
+    const ws = io('http://localhost:${portDefault}')
     ws.on('news', () => {
         location.reload()
     })
@@ -36,13 +48,14 @@ window.onload = () => {
             res.end(join(url, req.url))
         }
     })
-    server.listen(port, () => {
-        console.log(chalk.greenBright(`The web page is running on http://localhost:${port}`))
+    server.listen(portDefault, '0.0.0.0', () => {
+        console.log(chalk.greenBright(`The web page is running on http://localhost:${portDefault}`))
     })
+    server.on('error', serverError)
     ws = io(server, {
         allowEIO3: true,
     })
-    execSync(`start http://localhost:${port}`)
+    execSync(`start http://localhost:${portDefault}`)
     return server
 }
 
@@ -66,28 +79,3 @@ module.exports = {
         server = null
     }
 }
-
-// process.on('message', ({
-//     port,
-//     message,
-//     url
-// }) => {
-//     if (!server && message === 'init') {
-//         server = createServer(port, findFile(undefined, 'text/html', 'index.html'))
-//     } else if (message === 'update') {
-//         console.log(chalk.yellowBright(`file ${url} changed, and the page will reload`))
-//         const content = readFileSync(url, 'utf-8')
-//         if (mime.getType(url) === 'text/html' && index != content) {
-//             index = content
-//         }
-//         ws.emit && ws.emit('news')
-//     }
-// })
-
-// process.on('beforeExit', (status) => {
-//     server && server.close()
-//     ws && ws.close()
-//     ws = null
-//     server = null
-//     process.exit(1)
-// })

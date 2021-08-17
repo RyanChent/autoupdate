@@ -28,7 +28,7 @@ exports.init = (filePath) => {
     })
 }
 
-exports.watch = async (watcher, childProcess, dir, mode, serverEntry) => {
+exports.watch = async (watcher, childProcess, dir, mode) => {
     const handler = (filename) => {
         const filepath = resolve(dir, filename)
         if (childProcess) {
