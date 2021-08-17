@@ -8,7 +8,7 @@ const {
 const ora = require('ora')
 const chalk = require('chalk')
 const {
-    fork
+    fork, execSync
 } = require('child_process')
 const {
     resolve
@@ -23,12 +23,14 @@ let childProcess = null
 
 const exit = () => {
     childProcess && childProcess.kill('SIGINT')
+    execSync('npx pm2 del all')
     process.exit(1)
 }
 
 process.on('SIGINT', exit)
 process.on('uncaughtException', exit)
 process.on('unhandledRejection', exit)
+process.on('rejectionHandled', exit)
 
 program
     .version('1.0.0', '-v, --version')
@@ -44,11 +46,11 @@ program
         const spinner = ora('Starting...')
         const validPath = /^(?:[^\/]+\/?)+[^\/]$/
         try {
-            if (validPath.test(dir)) {
+            if (validPath.test(dir) || ['.', '..'].includes(dir)) {
                 /** init var */
                 const env = getMode(mode),
                     p = getPort(port),
-                    dirPath = resolve(process.cwd(), dir)
+                    dirPath = resolve(__dirname, dir)
 
                 /** init watcher */
                 const watcher = await init(dirPath)
@@ -59,7 +61,7 @@ program
                 }
 
                 /** fork child process */
-                childProcess = fork(`./bin/env/${env}`)
+                childProcess = fork(resolve(process.cwd(), `./bin/env/${env}`))
                 childProcess.send({
                     port: p,
                     message: 'init',
@@ -79,7 +81,6 @@ program
         } catch (e) {
             spinner.fail('Start Failed')
             console.log(chalk.redBright(e.message || e))
-            process.exit(-1)
         }
     })
 

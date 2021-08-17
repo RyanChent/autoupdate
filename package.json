@@ -1,12 +1,12 @@
 {
   "name": "autoupdate-simple",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a plugin that you can use it to auto restart program",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clint": "node ./bin/autoupdate.js watch ./bin -m client",
-    "server": "node ./bin/autoupdate.js watch ./bin -m server -f utils.js"
+    "server": "node ./bin/autoupdate.js watch . -m server -f utils.js"
   },
   "keywords": [
     "autoupdate",

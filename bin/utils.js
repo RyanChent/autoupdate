@@ -44,8 +44,9 @@ const normalizeLoc = (path) => {
     return process.platform === 'win32' ? path.replace(/\//g, "\\") : path
 }
 
-const findFile = (path = process.cwd(), type, target) => {
+const findFile = (path = __dirname, type, target) => {
     const fileNames = readdirSync(path)
+    console.log(fileNames)
     for (let i = 0; i < fileNames.length; i++) {
         const file = resolve(path, fileNames[i])
         if (/((^|[\/\\])\..|node_modules|README|package-lock|yarn|LICENSE)/.test(file)) {
