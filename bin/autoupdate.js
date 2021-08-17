@@ -22,8 +22,7 @@ const { normalizeFile } = require('./utils')
 let childProcess = null
 
 const exit = () => {
-    childProcess && childProcess.kill('SIGINT')
-    execSync('npx pm2 del all')
+    childProcess && childProcess.exit()
     process.exit(1)
 }
 
@@ -61,8 +60,8 @@ program
                 }
 
                 /** fork child process */
-                childProcess = fork(resolve(process.cwd(), `./bin/env/${env}`))
-                childProcess.send({
+                childProcess = require(`./env/${env}`)
+                childProcess.message({
                     port: p,
                     message: 'init',
                     url: env === 'client' ? dirPath : file

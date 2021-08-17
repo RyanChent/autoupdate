@@ -46,27 +46,48 @@ window.onload = () => {
     return server
 }
 
-process.on('message', ({
-    port,
-    message,
-    url
-}) => {
-    if (!server && message === 'init') {
-        server = createServer(port, findFile(undefined, 'text/html', 'index.html'))
-    } else if (message === 'update') {
-        console.log(chalk.yellowBright(`file ${url} changed, and the page will reload`))
-        const content = readFileSync(url, 'utf-8')
-        if (mime.getType(url) === 'text/html' && index != content) {
-            index = content
+module.exports = {
+    message: ({ port, message, url }) => {
+        if (!server && message === 'init') {
+            server = createServer(port, findFile(undefined, 'text/html', 'index.html'))
+        } else if (message === 'update') {
+            console.log(chalk.yellowBright(`file ${url} changed, and the page will reload`))
+            const content = readFileSync(url, 'utf-8')
+            if (mime.getType(url) === 'text/html' && index != content) {
+                index = content
+            }
+            ws.emit && ws.emit('news')
         }
-        ws.emit && ws.emit('news')
+    },
+    exit: () => {
+        server && server.close()
+        ws && ws.close()
+        ws = null
+        server = null
     }
-})
+}
 
-process.on('beforeExit', (status) => {
-    server && server.close()
-    ws && ws.close()
-    ws = null
-    server = null
-    process.exit(1)
-})
+// process.on('message', ({
+//     port,
+//     message,
+//     url
+// }) => {
+//     if (!server && message === 'init') {
+//         server = createServer(port, findFile(undefined, 'text/html', 'index.html'))
+//     } else if (message === 'update') {
+//         console.log(chalk.yellowBright(`file ${url} changed, and the page will reload`))
+//         const content = readFileSync(url, 'utf-8')
+//         if (mime.getType(url) === 'text/html' && index != content) {
+//             index = content
+//         }
+//         ws.emit && ws.emit('news')
+//     }
+// })
+
+// process.on('beforeExit', (status) => {
+//     server && server.close()
+//     ws && ws.close()
+//     ws = null
+//     server = null
+//     process.exit(1)
+// })

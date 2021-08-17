@@ -32,7 +32,7 @@ exports.watch = async (watcher, childProcess, dir, mode, serverEntry) => {
     const handler = (filename) => {
         const filepath = resolve(dir, filename)
         if (childProcess) {
-            childProcess.send({
+            childProcess.message({
                 message: 'update',
                 url: filepath
             })
@@ -42,7 +42,7 @@ exports.watch = async (watcher, childProcess, dir, mode, serverEntry) => {
         watcher.on('change', handler).on('unlink', handler).on('unlinkDir', handler)
         if (mode === 'client') {
             const html = findFile(undefined, 'text/html', 'index.html')
-            html && childProcess.send({
+            html && childProcess.message({
                 message: 'update',
                 url: html
             })

@@ -41,12 +41,11 @@ exports.normalizeFile = (path, suffix) => {
 
 const normalizeLoc = (path) => {
     if (typeof path !== 'string') return ''
-    return process.platform === 'win32' ? path.replace(/\//g, "\\") : path
+    return process.platform === 'win32' ? path.replace(/\//g, "\\").trim() : path.trim()
 }
 
 const findFile = (path = __dirname, type, target) => {
     const fileNames = readdirSync(path)
-    console.log(fileNames)
     for (let i = 0; i < fileNames.length; i++) {
         const file = resolve(path, fileNames[i])
         if (/((^|[\/\\])\..|node_modules|README|package-lock|yarn|LICENSE)/.test(file)) {
