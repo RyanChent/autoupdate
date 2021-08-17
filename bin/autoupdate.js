@@ -8,16 +8,12 @@ const {
 const ora = require('ora')
 const chalk = require('chalk')
 const {
-    fork, execSync
-} = require('child_process')
-const {
     resolve
 } = require('path')
 const {
     getPort,
     getMode
 } = require('./utils')
-const { normalizeFile } = require('./utils')
 
 let childProcess = null
 

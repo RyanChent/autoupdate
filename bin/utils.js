@@ -29,7 +29,6 @@ exports.getCommand = (command) => {
 }
 
 exports.normalizeFile = (path, suffix) => {
-    console.log(path)
     const temp = process.platform === 'win32' ? path.split('\\\\') : path.split('/')
     if (temp[temp.length - 1]) {
         const res = temp[temp.length - 1]
@@ -45,7 +44,7 @@ const normalizeLoc = (path) => {
     return process.platform === 'win32' ? path.replace(/\//g, "\\").trim() : path.trim()
 }
 
-const findFile = (path = __dirname, type, target) => {
+const findFile = (path = process.cwd(), type, target) => {
     const fileNames = readdirSync(path)
     for (let i = 0; i < fileNames.length; i++) {
         const file = resolve(path, fileNames[i])

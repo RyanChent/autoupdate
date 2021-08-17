@@ -16,9 +16,17 @@ const io = require('socket.io')
 const mime = require('mime/lite')
 const { findFile } = require('../utils')
 
-let server, ws, index, portDefault = 12345
+let server, ws, portDefault = 12345, index = `<html>
+  <head>
+    <title>404 Not Found</title>
+  </head>
+  <body>
+    <div>404 Not Found</div>
+  </body>
+</html>`
 
 const serverError = () => {
+    console.log(chalk.redBright(`The port is used, server is restart on a new port`))
     server && server.close()
     portDefault += 1
     server.listen(portDefault, '0.0.0.0', () => {
@@ -62,7 +70,11 @@ window.onload = () => {
 module.exports = {
     message: ({ port, message, url }) => {
         if (!server && message === 'init') {
-            server = createServer(port, findFile(undefined, 'text/html', 'index.html'))
+            const filepath = findFile(undefined, 'text/html', 'index.html')
+            if (filepath) {
+                index = readFileSync(filepath, 'utf-8')
+            }
+            server = createServer(port, url)
         } else if (message === 'update') {
             console.log(chalk.yellowBright(`file ${url} changed, and the page will reload`))
             const content = readFileSync(url, 'utf-8')
